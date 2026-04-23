@@ -30,10 +30,8 @@ class CSVReportWriter:
             True se sucesso, False se erro
         """
         try:
-            # Cria diretório se não existir
             Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
-            # Escreve CSV
             with open(filepath, "w", newline="", encoding="utf-8") as csvfile:
                 fieldnames = [
                     "Timestamp",

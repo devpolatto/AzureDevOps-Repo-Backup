@@ -45,12 +45,10 @@ class BackupService:
         Returns:
             Lista de relatórios de backup
         """
-        # Cria diretório de backup se não existir
         self.backup_base_path.mkdir(parents=True, exist_ok=True)
 
         reports: List[BackupReport] = []
 
-        # Lista todos os projects
         try:
             projects = self.api_client.get_projects()
         except Exception as e:
@@ -61,7 +59,6 @@ class BackupService:
             self.logger.error("Nenhum project encontrado.")
             return reports
 
-        # Para cada project, lista seus repositórios
         for project in projects:
             self.logger.info("──────────────────────────────────────")
             self.logger.info(f"Project: {project.name}")
@@ -77,7 +74,6 @@ class BackupService:
 
             self.logger.success(f"Encontrados {len(repos)} repositório(s).")
 
-            # Faz backup de cada repositório
             for repo in repos:
                 self.logger.info(f"  → Repo: {repo.name}")
 
@@ -96,13 +92,11 @@ class BackupService:
             destination_path: Caminho do repositório
         """
         try:
-            # Muda para detached HEAD para não ter conflito com branch ativa
             self.git_executor.execute(
                 ["git", "checkout", "--detach"],
                 destination_path,
             )
 
-            # Obtém todas as branches remotas
             result = subprocess.run(
                 ["git", "branch", "-r"],
                 cwd=destination_path,
@@ -117,14 +111,12 @@ class BackupService:
                 if line.strip() and "HEAD" not in line
             ]
 
-            # Cria branches locais para cada branch remota
             for branch in branches:
                 self.git_executor.execute(
                     ["git", "branch", "-f", branch, f"origin/{branch}"],
                     destination_path,
                 )
 
-                # Se pull_branches está ativo, faz pull de cada branch
                 if self.pull_branches:
                     self.git_executor.execute(
                         ["git", "checkout", branch],
@@ -155,18 +147,15 @@ class BackupService:
         start_time = datetime.now()
         status = BackupStatus.ERROR
 
-        # Remove organização do clone_url se existir (remoteUrl vem com Org@host)
         clean_url = clone_url
         if "@" in clean_url:
             clean_url = "https://" + clean_url.split("@", 1)[1]
-        # Injeta PAT na URL para autenticação
         auth_clone_url = clean_url.replace("https://", f"https://{quote(self.api_client.pat)}@")
 
         try:
             git_dir = os.path.join(destination_path, ".git")
 
             if os.path.exists(git_dir):
-                # Repositório já existe → atualiza
                 self.logger.info(f"Atualizando (pull) '{repo_name}'...")
 
                 success = True
@@ -186,10 +175,8 @@ class BackupService:
                 else:
                     status = BackupStatus.ERROR
             else:
-                # Primeiro backup → clone completo
                 self.logger.info(f"Clonando '{repo_name}'...")
 
-                # Cria diretório pai se não existir
                 parent_dir = os.path.dirname(destination_path)
                 os.makedirs(parent_dir, exist_ok=True)
 
@@ -211,7 +198,6 @@ class BackupService:
             self.logger.error(f"Falha no backup de '{repo_name}': {e}")
             status = BackupStatus.ERROR
 
-        # Retorna relatório
         elapsed = (datetime.now() - start_time).total_seconds()
         return BackupReport(
             timestamp=datetime.now(),
