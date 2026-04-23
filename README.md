@@ -1,4 +1,4 @@
-# Backup Azure DevOps - Acqio
+# Backup Full Azure DevOps
 
 Script para fazer backup automatizado de todos os repositórios Git de uma organização no Azure DevOps.
 
