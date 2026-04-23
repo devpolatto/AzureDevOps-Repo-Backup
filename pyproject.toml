@@ -1,0 +1,50 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "backup-azure-devops"
+version = "1.0.0"
+description = "Backup local de repositórios Git de uma organização no Azure DevOps"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Angelo Polatto", email = "polatto.xcode.job@gmail.com"}
+]
+dependencies = [
+    "colorama>=0.4.6",
+    "pydantic>=2.13.3",
+    "pydantic-settings>=2.14.0",
+    "python-dotenv>=1.2.2",
+    "requests>=2.33.1",
+]
+
+[project.scripts]
+backup-azure-devops = "backup_azure_devops.__main__:main"
+
+[tool.uv]
+package = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "mypy>=1.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
